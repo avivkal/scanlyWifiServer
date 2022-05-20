@@ -136,7 +136,10 @@ let scanned = [];
 const _scan = () =>
   new Promise((resolve, reject) => {
     iw.scan((err, result) => {
-      if (err) return reject(err);
+      if (err) {
+        console.error(err);
+        return reject(err);
+      }
       console.log("Scanned", JSON.stringify(result));
       if (result.length > 0) {
         scanned = result.map((d) => ({ ssid: d.essid, ...d }));
@@ -145,24 +148,26 @@ const _scan = () =>
     });
   });
 
-app.get("/isAlive", (req, res) => {
+app.get("/isAlive", (_req, res) => {
   res.send(true);
 });
 
-app.get("/scan", async (req, res) => {
+app.get("/scan", async (_req, res) => {
   const result = await _scan();
   res.send(result);
 });
 
 app.post("/connect", async (req, res) => {
   connect(req.body.ssid, req.body.password);
-  cp.exec(`echo "${req.body.cred}" > cred.txt`)
+  cp.exec(`touch cred.txt`);
+  cp.exec(`echo "${req.body.cred}" > cred.txt`);
   res.send("Connected??");
 });
 
 app.get("/test", async (req, res) => {
   connect(req.query.ssid, req.query.password);
-  cp.exec(`echo "${req.query.cred}" > cred.txt`)
+  cp.exec(`touch cred.txt`);
+  cp.exec(`echo "${req.query.cred}" > cred.txt`); // ? was never tested
   res.send("Connected??");
 });
 
