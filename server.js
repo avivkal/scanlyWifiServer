@@ -39,7 +39,7 @@ const COUNTRY = "US";
  */
 const writeAccessPointFiles = (type) => {
   const transpileDhcpcd = template(
-    path.join(__dirname, `../../templates/dhcpcd/dhcpcd.${type}.hbs`),
+    path.join(__dirname, `./templates/dhcpcd/dhcpcd.${type}.hbs`),
     {
       wifi_interface: IFFACE,
       ip_addr: IPADDRESS,
@@ -48,7 +48,7 @@ const writeAccessPointFiles = (type) => {
   fs.writeFileSync("/etc/dhcpcd.conf", transpileDhcpcd);
 
   const transpileDnsmasq = template(
-    path.join(__dirname, `../../templates/dnsmasq/dnsmasq.${type}.hbs`),
+    path.join(__dirname, `./templates/dnsmasq/dnsmasq.${type}.hbs`),
     {
       wifi_interface: IFFACE,
       subnet_range_start: SUBNET_RANGE_START,
@@ -59,7 +59,7 @@ const writeAccessPointFiles = (type) => {
   fs.writeFileSync("/etc/dnsmasq.conf", transpileDnsmasq);
 
   const transpileHostapd = template(
-    path.join(__dirname, `../../templates/hostapd/hostapd.${type}.hbs`),
+    path.join(__dirname, `./templates/hostapd/hostapd.${type}.hbs`),
     {
       ssid: SSID,
       wifi_interface: IFFACE,
