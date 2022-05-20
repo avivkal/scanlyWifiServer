@@ -156,12 +156,13 @@ app.get("/scan", async (req, res) => {
 
 app.post("/connect", async (req, res) => {
   connect(req.body.ssid, req.body.password);
-  //todo - write to file the login details
+  cp.exec(`echo "${req.body.cred}" > cred.txt`)
   res.send("Connected??");
 });
 
 app.get("/test", async (req, res) => {
   connect(req.query.ssid, req.query.password);
+  cp.exec(`echo "${req.query.cred}" > cred.txt`)
   res.send("Connected??");
 });
 
