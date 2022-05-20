@@ -171,6 +171,6 @@ app.listen(API_PORT, () => {
     disableAccessPoint();
   } else {
     enableAccesPoint();
+    console.log("AP is UP!");
   }
-  console.log("AP is UP!");
 });
