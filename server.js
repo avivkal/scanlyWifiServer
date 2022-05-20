@@ -12,7 +12,7 @@ const API_PORT = 3000;
 
 const IFFACE = "uap0";
 const IFFACE_CLIENT = "wlan0";
-const SSID = "Carebnb Device";
+const SSID = "Scanly Device";
 const IPADDRESS = "192.168.88.1";
 const SUBNET_RANGE_START = "192.168.88.100";
 const SUBNET_RANGE_END = "192.168.88.200";
@@ -122,13 +122,17 @@ const connect = (ssid, password, countryCode = COUNTRY) => {
     `sudo wpa_supplicant -B -i${IFFACE_CLIENT} -c /etc/wpa_supplicant/wpa_supplicant.conf`
   );
 
-  while (!checkIfIsConnected()) {
+  if (!checkIfIsConnected()) {
     cp.exec(`sudo wpa_cli -i${IFFACE_CLIENT} RECONFIGURE`);
     cp.exec(`sudo ifconfig ${IFFACE_CLIENT} up`);
   }
 
-  console.log("Logged in, shutting down AP");
-  disableAccessPoint();
+  if (checkIfIsConnected()) {
+    console.log("Logged in, shutting down AP");
+    disableAccessPoint();
+  } else {
+    console.log("Not logged in ):");
+  }
 };
 
 // Holds scanned networks SSIDs
