@@ -122,12 +122,20 @@ const connect = (ssid, password, countryCode = COUNTRY) => {
     `sudo wpa_supplicant -B -i${IFFACE_CLIENT} -c /etc/wpa_supplicant/wpa_supplicant.conf`
   );
 
+  cp.exec("sudo systemctl daemon-reload");
+  cp.exec("sudo systemctl restart dhcpcd");
+
   if (!checkIfIsConnected()) {
-    cp.exec(`sudo wpa_cli -i${IFFACE_CLIENT} RECONFIGURE`);
-    cp.exec(`sudo ifconfig ${IFFACE_CLIENT} up`);
+    console.log("failed to connect");
+  } else {
+    disableAccessPoint();
+    console.log("connected");
   }
 
-  cp.exec(`sudo reboot`);
+  // cp.exec(`sudo wpa_cli -i${IFFACE_CLIENT} RECONFIGURE`);
+  // cp.exec(`sudo ifconfig ${IFFACE_CLIENT} up`);
+
+  // cp.exec(`sudo reboot`);
 };
 
 // Holds scanned networks SSIDs
