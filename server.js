@@ -2,11 +2,34 @@ const express = require("express");
 const cp = require("child_process");
 const path = require("path");
 const fs = require("fs");
-const config = require("./config");
 const template = require("./template");
 
 const app = express();
 const port = 3000;
+
+const PROJECT_NAME = "Carebnb";
+const CUSTOM_PROPERTIES_FILE = "/var/carebnb_props.json";
+
+const API_URL = "http://localhost:3500";
+const API_PORT = "3500";
+
+const SESSION_KEY = "339Mdea2MxaJj5AZAuJcrpIfqlzzBGFd246E7AEE74F69F1E";
+
+const NODE_ENV = "development";
+const ENVIRONMENT = NODE_ENV;
+const JWT_KEY =
+  "JD8Gzr5h1k3322Zi1632hOG20nOyczHdRCOxYyZ2gmZZNcK7BufFu4InylIzrv";
+
+const IFFACE = "uap0";
+const IFFACE_CLIENT = "wlan0";
+const SSID = "Carebnb Device";
+const IPADDRESS = "192.168.88.1";
+const SUBNET_RANGE_START = "192.168.88.100";
+const SUBNET_RANGE_END = "192.168.88.200";
+const NETMASK = "255.255.255.0";
+const FORCE_ACCESSPOINT = "1";
+const COUNTRY = "US";
+
 
 /**
  * Aux method, write access point files from templates
@@ -18,8 +41,8 @@ const writeAccessPointFiles = (type) => {
   const transpileDhcpcd = template(
     path.join(__dirname, `../../templates/dhcpcd/dhcpcd.${type}.hbs`),
     {
-      wifi_interface: config.IFFACE,
-      ip_addr: config.IPADDRESS,
+      wifi_interface: IFFACE,
+      ip_addr: IPADDRESS,
     }
   );
   fs.writeFileSync("/etc/dhcpcd.conf", transpileDhcpcd);
@@ -27,10 +50,10 @@ const writeAccessPointFiles = (type) => {
   const transpileDnsmasq = template(
     path.join(__dirname, `../../templates/dnsmasq/dnsmasq.${type}.hbs`),
     {
-      wifi_interface: config.IFFACE,
-      subnet_range_start: config.SUBNET_RANGE_START,
-      subnet_range_end: config.SUBNET_RANGE_END,
-      netmask: config.NETMASK,
+      wifi_interface: IFFACE,
+      subnet_range_start: SUBNET_RANGE_START,
+      subnet_range_end: SUBNET_RANGE_END,
+      netmask: NETMASK,
     }
   );
   fs.writeFileSync("/etc/dnsmasq.conf", transpileDnsmasq);
@@ -38,8 +61,8 @@ const writeAccessPointFiles = (type) => {
   const transpileHostapd = template(
     path.join(__dirname, `../../templates/hostapd/hostapd.${type}.hbs`),
     {
-      ssid: config.SSID,
-      wifi_interface: config.IFFACE,
+      ssid: SSID,
+      wifi_interface: IFFACE,
     }
   );
   fs.writeFileSync("/etc/hostapd/hostapd.conf", transpileHostapd);
@@ -53,7 +76,7 @@ app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
   writeAccessPointFiles("ap");
   cp.exec(
-    "sudo iw dev ${config.IFFACE_CLIENT} interface add ${config.IFFACE} type __ap"
+    `sudo iw dev ${IFFACE_CLIENT} interface add ${IFFACE} type __ap`
   );
   cp.exec("sudo systemctl start dhcpcd");
   cp.exec("sudo systemctl enable hostapd");
