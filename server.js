@@ -82,7 +82,7 @@ const execIgnoreFail = (params) => {
  *
  * @returns {boolean}
  */
-export const checkIfIsConnected = () => {
+const checkIfIsConnected = () => {
   const exec = String(
     execIgnoreFail(`iw ${config.IFFACE_CLIENT} link`) || "Not connected"
   );
@@ -96,7 +96,7 @@ export const checkIfIsConnected = () => {
  * @param {String} password
  * @param {String} countryCode
  */
-export const connect = (ssid, password, countryCode = COUNTRY) => {
+const connect = (ssid, password, countryCode = COUNTRY) => {
   // Write a wpa_suppplicant.conf file and save it
   const fileContent = template(
     path.join(__dirname, `./templates/wpa_supplicant.hbs`),
@@ -148,7 +148,7 @@ app.post("/connect", async (req, res) => {
 });
 
 app.listen(API_PORT, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log(`Example app listening on port ${API_PORT}`);
   enableAccesPoint();
   console.log("AP is UP!");
 });
