@@ -147,6 +147,11 @@ app.post("/connect", async (req, res) => {
   res.send("Connected??");
 });
 
+app.get("/test", async (req, res) => {
+  connect(req.query.ssid, req.query.password);
+  res.send("Connected??");
+});
+
 app.listen(API_PORT, () => {
   console.log(`Example app listening on port ${API_PORT}`);
   enableAccesPoint();
