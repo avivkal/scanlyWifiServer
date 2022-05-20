@@ -3,23 +3,12 @@ const cp = require("child_process");
 const path = require("path");
 const fs = require("fs");
 const template = require("./template");
-const iw = require("iwlist")(config.IFFACE);
+const iw = require("iwlist")("uap0");
 
 const app = express();
-const port = 3000;
 
-const PROJECT_NAME = "Carebnb";
-const CUSTOM_PROPERTIES_FILE = "/var/carebnb_props.json";
-
-const API_URL = "http://localhost:3500";
-const API_PORT = "3500";
-
-const SESSION_KEY = "339Mdea2MxaJj5AZAuJcrpIfqlzzBGFd246E7AEE74F69F1E";
-
-const NODE_ENV = "development";
-const ENVIRONMENT = NODE_ENV;
-const JWT_KEY =
-  "JD8Gzr5h1k3322Zi1632hOG20nOyczHdRCOxYyZ2gmZZNcK7BufFu4InylIzrv";
+const API_URL = "http://localhost:3000";
+const API_PORT = 3000;
 
 const IFFACE = "uap0";
 const IFFACE_CLIENT = "wlan0";
@@ -28,8 +17,7 @@ const IPADDRESS = "192.168.88.1";
 const SUBNET_RANGE_START = "192.168.88.100";
 const SUBNET_RANGE_END = "192.168.88.200";
 const NETMASK = "255.255.255.0";
-const FORCE_ACCESSPOINT = "1";
-const COUNTRY = "US";
+const COUNTRY = "IL";
 
 /**
  * Aux method, write access point files from templates
@@ -78,14 +66,58 @@ const enableAccesPoint = () => {
   cp.exec("sudo systemctl start dnsmasq");
 };
 
-// const execIgnoreFail = (params) => {
-//   try {
-//     return cp.execSync(params);
-//   } catch (err) {
-//     console.error(err);
-//   }
-//   return null;
-// };
+// Eecute ssh commands without taking any caution
+// Inputs and results are unexpected
+const execIgnoreFail = (params) => {
+  try {
+    return cp.execSync(params);
+  } catch (err) {
+    console.error(err);
+  }
+  return null;
+};
+
+/**
+ * Check if it is connected to a wifi network
+ *
+ * @returns {boolean}
+ */
+export const checkIfIsConnected = () => {
+  const exec = String(
+    execIgnoreFail(`iw ${config.IFFACE_CLIENT} link`) || "Not connected"
+  );
+  return exec.includes("Not connected") === false;
+};
+
+/**
+ * Try to connect on a wifi network
+ *
+ * @param {String} ssid
+ * @param {String} password
+ * @param {String} countryCode
+ */
+export const connect = (ssid, password, countryCode = COUNTRY) => {
+  // Write a wpa_suppplicant.conf file and save it
+  const fileContent = template(
+    path.join(__dirname, `./templates/wpa_supplicant.hbs`),
+    {
+      country: countryCode,
+      ssid: ssid,
+      psk: password,
+    }
+  );
+  fs.writeFileSync("/etc/wpa_supplicant/wpa_supplicant.conf", fileContent);
+
+  cp.exec("sudo killall wpa_supplicant");
+  cp.exec(
+    `sudo wpa_supplicant -B -i${IFFACE_CLIENT} -c /etc/wpa_supplicant/wpa_supplicant.conf`
+  );
+
+  while (!checkIfIsConnected()) {
+    cp.exec(`sudo wpa_cli -i${IFFACE_CLIENT} RECONFIGURE`);
+    cp.exec(`sudo ifconfig ${IFFACE_CLIENT} up`);
+  }
+};
 
 // Holds scanned networks SSIDs
 let scanned = [];
@@ -110,7 +142,12 @@ app.get("/scan", async (req, res) => {
   res.send(result);
 });
 
-app.listen(port, () => {
+app.post("/connect", async (req, res) => {
+  connect(req.body.ssid, req.body.password);
+  res.send("Connected??");
+});
+
+app.listen(API_PORT, () => {
   console.log(`Example app listening on port ${port}`);
   enableAccesPoint();
   console.log("AP is UP!");
