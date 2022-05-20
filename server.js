@@ -84,7 +84,7 @@ const execIgnoreFail = (params) => {
  */
 const checkIfIsConnected = () => {
   const exec = String(
-    execIgnoreFail(`iw ${config.IFFACE_CLIENT} link`) || "Not connected"
+    execIgnoreFail(`iw ${IFFACE_CLIENT} link`) || "Not connected"
   );
   return exec.includes("Not connected") === false;
 };
