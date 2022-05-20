@@ -132,8 +132,8 @@ const connect = (ssid, password, cred, countryCode = COUNTRY) => {
     } else {
       disableAccessPoint();
       console.log("connected");
-      cp.exec(`touch /home/pi/cred.txt`);
-      cp.exec(`echo "${cred}" > /home/pi/cred.txt`);
+      cp.exec(`touch ../cred.txt`);
+      cp.exec(`echo "${cred}" > ../cred.txt`);
     }
   }, 5000);
 };
