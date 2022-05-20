@@ -127,9 +127,10 @@ const connect = (ssid, password, countryCode = COUNTRY) => {
     cp.exec(`sudo ifconfig ${IFFACE_CLIENT} up`);
   }
 
+  disableAccessPoint();
+
   if (checkIfIsConnected()) {
     console.log("Logged in, shutting down AP");
-    disableAccessPoint();
   } else {
     console.log("Not logged in ):");
   }
