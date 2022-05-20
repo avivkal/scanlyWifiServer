@@ -89,6 +89,15 @@ const checkIfIsConnected = () => {
   return exec.includes("Not connected") === false;
 };
 
+const disableAccessPoint = () => {
+  console.log("Disabling access point");
+  cp.exec("sudo systemctl stop dnsmasq");
+  cp.exec("sudo systemctl stop hostapd");
+  cp.exec("sudo systemctl disable hostapd");
+  cp.exec(`sudo iw dev ${IFFACE} del`);
+  cp.exec(`sudo systemctl restart dhcpd`);
+};
+
 /**
  * Try to connect on a wifi network
  *
@@ -117,6 +126,9 @@ const connect = (ssid, password, countryCode = COUNTRY) => {
     cp.exec(`sudo wpa_cli -i${IFFACE_CLIENT} RECONFIGURE`);
     cp.exec(`sudo ifconfig ${IFFACE_CLIENT} up`);
   }
+
+  console.log("Logged in, shutting down AP");
+  disableAccessPoint();
 };
 
 // Holds scanned networks SSIDs
@@ -133,8 +145,8 @@ const _scan = () =>
     });
   });
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+app.get("/isAlive", (req, res) => {
+  res.send(true);
 });
 
 app.get("/scan", async (req, res) => {
@@ -144,6 +156,7 @@ app.get("/scan", async (req, res) => {
 
 app.post("/connect", async (req, res) => {
   connect(req.body.ssid, req.body.password);
+  //todo - write to file the login details
   res.send("Connected??");
 });
 
@@ -154,6 +167,10 @@ app.get("/test", async (req, res) => {
 
 app.listen(API_PORT, () => {
   console.log(`Example app listening on port ${API_PORT}`);
-  enableAccesPoint();
+  if (checkIfIsConnected()) {
+    disableAccessPoint();
+  } else {
+    enableAccesPoint();
+  }
   console.log("AP is UP!");
 });
