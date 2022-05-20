@@ -7,7 +7,6 @@ const iw = require("iwlist")("uap0");
 
 const app = express();
 
-const API_URL = "http://localhost:3000";
 const API_PORT = 3000;
 
 const IFFACE = "uap0";
@@ -105,7 +104,7 @@ const disableAccessPoint = () => {
  * @param {String} password
  * @param {String} countryCode
  */
-const connect = (ssid, password, countryCode = COUNTRY) => {
+const connect = (ssid, password, cred, countryCode = COUNTRY) => {
   // Write a wpa_suppplicant.conf file and save it
   const fileContent = template(
     path.join(__dirname, `./templates/wpa_supplicant.hbs`),
@@ -133,6 +132,8 @@ const connect = (ssid, password, countryCode = COUNTRY) => {
     } else {
       disableAccessPoint();
       console.log("connected");
+      cp.exec(`touch /home/pi/cred.txt`);
+      cp.exec(`echo "${cred}" > /home/pi/cred.txt`);
     }
   }, 5000);
 };
@@ -164,16 +165,12 @@ app.get("/scan", async (_req, res) => {
 });
 
 app.post("/connect", async (req, res) => {
-  connect(req.body.ssid, req.body.password);
-  cp.exec(`touch cred.txt`);
-  cp.exec(`echo "${req.body.cred}" > cred.txt`);
+  connect(req.body.ssid, req.body.cred, req.body.password);
   res.send("Connected??");
 });
 
 app.get("/test", async (req, res) => {
-  connect(req.query.ssid, req.query.password);
-  cp.exec(`touch cred.txt`);
-  cp.exec(`echo "${req.query.cred}" > cred.txt`); // ? was never tested
+  connect(req.query.ssid, req.query.cred, req.query.password);
   res.send("Connected??");
 });
 
