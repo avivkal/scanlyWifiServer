@@ -135,23 +135,10 @@ const connect = (ssid, password, cred, countryCode = COUNTRY) => {
         console.log("connected");
         cp.exec(`touch ../cred.txt`);
         cp.exec(`echo "${cred}" > ../cred.txt`);
-        // disableAccessPoint();
         resolve(true);
       }
-    }, 5000);
+    }, 7000);
   });
-  // setTimeout(() => {
-  //   if (!checkIfIsConnected()) {
-  //     console.log("failed to connect");
-  //     return false;
-  //   } else {
-  //     console.log("connected");
-  //     cp.exec(`touch ../cred.txt`);
-  //     cp.exec(`echo "${cred}" > ../cred.txt`);
-  //     // disableAccessPoint();
-  //     return true;
-  //   }
-  // }, 5000);
 };
 
 // Holds scanned networks SSIDs
@@ -186,6 +173,9 @@ app.post("/connect", async (req, res) => {
     req.body.password,
     req.body.cred
   );
+  if (responseConnection) {
+    disableAccessPoint();
+  }
   console.log(responseConnection);
   res.send(responseConnection);
 });
@@ -196,6 +186,9 @@ app.get("/test", async (req, res) => {
     req.query.password,
     req.query.cred
   );
+  if (responseConnection) {
+    disableAccessPoint();
+  }
   console.log(responseConnection);
   res.send(responseConnection);
 });
