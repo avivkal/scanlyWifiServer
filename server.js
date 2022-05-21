@@ -104,7 +104,7 @@ const disableAccessPoint = () => {
  * @param {String} password
  * @param {String} countryCode
  */
-const connect = (ssid, password, cred, res, countryCode = COUNTRY) => {
+const connect = (ssid, password, cred, countryCode = COUNTRY) => {
   // Write a wpa_suppplicant.conf file and save it
   const fileContent = template(
     path.join(__dirname, `./templates/wpa_supplicant.hbs`),
@@ -128,14 +128,14 @@ const connect = (ssid, password, cred, res, countryCode = COUNTRY) => {
 
   setTimeout(() => {
     if (!checkIfIsConnected()) {
-      res.send(false);
       console.log("failed to connect");
+      return false;
     } else {
-      res.send(true);
       console.log("connected");
       cp.exec(`touch ../cred.txt`);
       cp.exec(`echo "${cred}" > ../cred.txt`);
-      disableAccessPoint();
+      // disableAccessPoint();
+      return true;
     }
   }, 5000);
 };
@@ -167,13 +167,23 @@ app.get("/scan", async (_req, res) => {
 });
 
 app.post("/connect", async (req, res) => {
-  connect(req.body.ssid, req.body.password, req.body.cred, res);
-  // res.send("Connected??");
+  const responseConnection = connect(
+    req.body.ssid,
+    req.body.password,
+    req.body.cred
+  );
+  console.log(responseConnection);
+  res.send(responseConnection);
 });
 
 app.get("/test", async (req, res) => {
-  connect(req.query.ssid, req.query.password, req.query.cred, res);
-  // res.send("Connected??");
+  const responseConnection = connect(
+    req.query.ssid,
+    req.query.password,
+    req.query.cred
+  );
+  console.log(responseConnection);
+  res.send(responseConnection);
 });
 
 app.listen(API_PORT, () => {
