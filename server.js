@@ -126,18 +126,32 @@ const connect = (ssid, password, cred, countryCode = COUNTRY) => {
   cp.exec("sudo systemctl daemon-reload");
   cp.exec("sudo systemctl restart dhcpcd");
 
-  setTimeout(() => {
-    if (!checkIfIsConnected()) {
-      console.log("failed to connect");
-      return false;
-    } else {
-      console.log("connected");
-      cp.exec(`touch ../cred.txt`);
-      cp.exec(`echo "${cred}" > ../cred.txt`);
-      // disableAccessPoint();
-      return true;
-    }
-  }, 5000);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      if (!checkIfIsConnected()) {
+        console.log("failed to connect");
+        resolve(false);
+      } else {
+        console.log("connected");
+        cp.exec(`touch ../cred.txt`);
+        cp.exec(`echo "${cred}" > ../cred.txt`);
+        // disableAccessPoint();
+        resolve(true);
+      }
+    }, 5000);
+  });
+  // setTimeout(() => {
+  //   if (!checkIfIsConnected()) {
+  //     console.log("failed to connect");
+  //     return false;
+  //   } else {
+  //     console.log("connected");
+  //     cp.exec(`touch ../cred.txt`);
+  //     cp.exec(`echo "${cred}" > ../cred.txt`);
+  //     // disableAccessPoint();
+  //     return true;
+  //   }
+  // }, 5000);
 };
 
 // Holds scanned networks SSIDs
@@ -167,7 +181,7 @@ app.get("/scan", async (_req, res) => {
 });
 
 app.post("/connect", async (req, res) => {
-  const responseConnection = connect(
+  const responseConnection = await connect(
     req.body.ssid,
     req.body.password,
     req.body.cred
@@ -177,7 +191,7 @@ app.post("/connect", async (req, res) => {
 });
 
 app.get("/test", async (req, res) => {
-  const responseConnection = connect(
+  const responseConnection = await connect(
     req.query.ssid,
     req.query.password,
     req.query.cred
