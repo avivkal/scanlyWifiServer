@@ -128,14 +128,14 @@ const connect = (ssid, password, cred, res, countryCode = COUNTRY) => {
 
   setTimeout(() => {
     if (!checkIfIsConnected()) {
-      console.log("failed to connect");
       res.send(false);
+      console.log("failed to connect");
     } else {
-      disableAccessPoint();
+      res.send(true);
       console.log("connected");
       cp.exec(`touch ../cred.txt`);
       cp.exec(`echo "${cred}" > ../cred.txt`);
-      res.send(true);
+      disableAccessPoint();
     }
   }, 5000);
 };
