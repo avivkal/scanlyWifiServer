@@ -97,6 +97,8 @@ const disableAccessPoint = () => {
   cp.exec(`sudo systemctl restart dhcpd`);
 };
 
+const errorCallaback = (error) => console.log(error);
+
 /**
  * Try to connect on a wifi network
  *
@@ -116,15 +118,16 @@ const connect = (ssid, password, cred, countryCode = COUNTRY) => {
   );
   fs.writeFileSync("/etc/wpa_supplicant/wpa_supplicant.conf", fileContent);
 
-  cp.exec("sudo killall wpa_supplicant");
+  cp.exec("sudo killall wpa_supplicant", errorCallaback);
   cp.exec(
-    `sudo wpa_supplicant -B -i ${IFFACE_CLIENT} -c /etc/wpa_supplicant/wpa_supplicant.conf`
+    `sudo wpa_supplicant -B -i ${IFFACE_CLIENT} -c /etc/wpa_supplicant/wpa_supplicant.conf`,
+    errorCallaback
   );
 
-  cp.exec(`sudo wpa_cli -i ${IFFACE_CLIENT} RECONFIGURE`);
-  cp.exec(`sudo ifconfig ${IFFACE_CLIENT} up`);
-  cp.exec("sudo systemctl daemon-reload");
-  cp.exec("sudo systemctl restart dhcpcd");
+  cp.exec(`sudo wpa_cli -i ${IFFACE_CLIENT} RECONFIGURE`, errorCallaback);
+  cp.exec(`sudo ifconfig ${IFFACE_CLIENT} up`, errorCallaback);
+  cp.exec("sudo systemctl daemon-reload", errorCallaback);
+  cp.exec("sudo systemctl restart dhcpcd", errorCallaback);
 
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -133,8 +136,8 @@ const connect = (ssid, password, cred, countryCode = COUNTRY) => {
         resolve(false);
       } else {
         console.log("connected");
-        cp.exec(`touch ../cred.txt`);
-        cp.exec(`echo "${cred}" > ../cred.txt`);
+        cp.exec(`touch ../cred.txt`, errorCallaback);
+        cp.exec(`echo "${cred}" > ../cred.txt`, errorCallaback);
         resolve(true);
       }
     }, 7000);
