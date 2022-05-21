@@ -118,16 +118,16 @@ const connect = (ssid, password, cred, countryCode = COUNTRY) => {
   );
   fs.writeFileSync("/etc/wpa_supplicant/wpa_supplicant.conf", fileContent);
 
-  cp.exec("sudo killall wpa_supplicant", errorCallaback);
-  cp.exec(
+  execIgnoreFail("sudo killall wpa_supplicant");
+  execIgnoreFail(
     `sudo wpa_supplicant -B -i ${IFFACE_CLIENT} -c /etc/wpa_supplicant/wpa_supplicant.conf`,
-    errorCallaback
+
   );
 
-  cp.exec(`sudo wpa_cli -i ${IFFACE_CLIENT} RECONFIGURE`, errorCallaback);
-  cp.exec(`sudo ifconfig ${IFFACE_CLIENT} up`, errorCallaback);
-  cp.exec("sudo systemctl daemon-reload", errorCallaback);
-  cp.exec("sudo systemctl restart dhcpcd", errorCallaback);
+  execIgnoreFail(`sudo wpa_cli -i ${IFFACE_CLIENT} RECONFIGURE`);
+  execIgnoreFail(`sudo ifconfig ${IFFACE_CLIENT} up`);
+  execIgnoreFail("sudo systemctl daemon-reload");
+  execIgnoreFail("sudo systemctl restart dhcpcd");
 
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -136,8 +136,8 @@ const connect = (ssid, password, cred, countryCode = COUNTRY) => {
         resolve(false);
       } else {
         console.log("connected");
-        cp.exec(`touch ../cred.txt`, errorCallaback);
-        cp.exec(`echo "${cred}" > ../cred.txt`, errorCallaback);
+        execIgnoreFail(`touch ../cred.txt`);
+        execIgnoreFail(`echo "${cred}" > ../cred.txt`);
         resolve(true);
       }
     }, 7000);
