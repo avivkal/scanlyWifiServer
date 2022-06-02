@@ -114,7 +114,7 @@ const sleep = (time) => {
  * @param {String} password
  * @param {String} countryCode
  */
-const connect = (ssid, password, cred, countryCode = COUNTRY) => {
+const connect = async (ssid, password, cred, countryCode = COUNTRY) => {
   // Write a wpa_suppplicant.conf file and save it
   const fileContent = template(
     path.join(__dirname, `./templates/wpa_supplicant.hbs`),
@@ -135,15 +135,15 @@ const connect = (ssid, password, cred, countryCode = COUNTRY) => {
   );
 
   console.log("Starting connection");
-  await sleep(2000);
+  await sleep(1000);
   execIgnoreFail("sudo killall wpa_supplicant");
-  await sleep(4000);
+  await sleep(1000);
   execIgnoreFail(
     `sudo wpa_supplicant -B -i ${IFFACE_CLIENT} -c /etc/wpa_supplicant/wpa_supplicant.conf`
-    );
+  );
 
-  await sleep(4000);
-  
+  await sleep(1000);
+
   execIgnoreFail(`sudo wpa_cli -i ${IFFACE_CLIENT} RECONFIGURE`);
   await sleep(1000);
   execIgnoreFail(`sudo ifconfig ${IFFACE_CLIENT} down`);
@@ -152,12 +152,12 @@ const connect = (ssid, password, cred, countryCode = COUNTRY) => {
   await sleep(10000);
 
   console.log("Checking connection");
-  try{
-    cp.execSync('ping -c 1 google.com');
+  try {
+    cp.execSync("ping -c 1 google.com");
     console.log("Ping successful");
     execIgnoreFail(`touch ../cred.txt`);
     execIgnoreFail(`echo "${cred}" > ../cred.txt`);
-    console.log("Write cred successful"); 
+    console.log("Write cred successful");
   } catch {
     console.log("failed to connect");
     return false;
@@ -196,11 +196,13 @@ app.post("/connect", async (req, res) => {
     req.body.password,
     req.body.cred
   );
+
+  console.log(responseConnection);
+  res.send(responseConnection);
+
   if (responseConnection) {
     disableAccessPoint();
   }
-  console.log(responseConnection);
-  res.send(responseConnection);
 });
 
 app.get("/test", async (req, res) => {
@@ -209,11 +211,13 @@ app.get("/test", async (req, res) => {
     req.query.password,
     req.query.cred
   );
+
+  console.log(responseConnection);
+  res.send(responseConnection);
+  
   if (responseConnection) {
     disableAccessPoint();
   }
-  console.log(responseConnection);
-  res.send(responseConnection);
 });
 
 app.listen(API_PORT, () => {
