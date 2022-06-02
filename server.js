@@ -99,6 +99,14 @@ const disableAccessPoint = () => {
 
 const errorCallaback = (error) => console.log(error);
 
+const sleep = (time) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, time);
+  });
+};
+
 /**
  * Try to connect on a wifi network
  *
@@ -119,20 +127,27 @@ const connect = (ssid, password, cred, countryCode = COUNTRY) => {
   fs.writeFileSync("/etc/wpa_supplicant/wpa_supplicant.conf", fileContent);
   fs.writeFileSync(
     "/etc/network/interfaces",
-    `auto wlan0
-iface wlan0 inet manual
-wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+    `iface wlan0 inet static
+    address ${IPADDRESS}
+    netmask ${NETMASK}
+    pre-up wpa_supplicant -i wlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf -B
   `
   );
 
+  await sleep(2000);
   execIgnoreFail("sudo killall wpa_supplicant");
+  await sleep(4000);
   execIgnoreFail(
     `sudo wpa_supplicant -B -i ${IFFACE_CLIENT} -c /etc/wpa_supplicant/wpa_supplicant.conf`
-  );
-
-  execIgnoreFail(`sudo wpa_cli -i ${IFFACE_CLIENT} RECONFIGURE`);
-  execIgnoreFail(`sudo ifconfig ${IFFACE_CLIENT} down`);
-  execIgnoreFail(`sudo ifconfig ${IFFACE_CLIENT} up`);
+    );
+    await sleep(4000);
+    
+    execIgnoreFail(`sudo wpa_cli -i ${IFFACE_CLIENT} RECONFIGURE`);
+    await sleep(1000);
+    execIgnoreFail(`sudo ifconfig ${IFFACE_CLIENT} down`);
+    await sleep(1000);
+    execIgnoreFail(`sudo ifconfig ${IFFACE_CLIENT} up`);
+    await sleep(3000);
   // execIgnoreFail("sudo systemctl daemon-reload");
   // execIgnoreFail("sudo systemctl restart dhcpcd");
 
