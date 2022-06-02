@@ -134,44 +134,33 @@ const connect = (ssid, password, cred, countryCode = COUNTRY) => {
   `
   );
 
+  console.log("Starting connection");
   await sleep(2000);
   execIgnoreFail("sudo killall wpa_supplicant");
   await sleep(4000);
   execIgnoreFail(
     `sudo wpa_supplicant -B -i ${IFFACE_CLIENT} -c /etc/wpa_supplicant/wpa_supplicant.conf`
     );
-    await sleep(4000);
-    
-    execIgnoreFail(`sudo wpa_cli -i ${IFFACE_CLIENT} RECONFIGURE`);
-    await sleep(1000);
-    execIgnoreFail(`sudo ifconfig ${IFFACE_CLIENT} down`);
-    await sleep(1000);
-    execIgnoreFail(`sudo ifconfig ${IFFACE_CLIENT} up`);
-    await sleep(3000);
-  // execIgnoreFail("sudo systemctl daemon-reload");
-  // execIgnoreFail("sudo systemctl restart dhcpcd");
 
-  // return new Promise((resolve) => {
-  //   setTimeout(() => {
-  //     if (!checkIfIsConnected()) {
-  //       console.log("failed to connect");
-  //       resolve(false);
-  //     } else {
-  //       console.log("connected");
-  //       execIgnoreFail(`touch ../cred.txt`);
-  //       execIgnoreFail(`echo "${cred}" > ../cred.txt`);
-  //       resolve(true);
-  //     }
-  //   }, 7000);
-  // });
-  if (!checkIfIsConnected()) {
-    console.log("failed to connect");
-    return false;
-  } else {
-    console.log("connected");
+  await sleep(4000);
+  
+  execIgnoreFail(`sudo wpa_cli -i ${IFFACE_CLIENT} RECONFIGURE`);
+  await sleep(1000);
+  execIgnoreFail(`sudo ifconfig ${IFFACE_CLIENT} down`);
+  await sleep(1000);
+  execIgnoreFail(`sudo ifconfig ${IFFACE_CLIENT} up`);
+  await sleep(10000);
+
+  console.log("Checking connection");
+  try{
+    cp.execSync('ping -c 1 google.com');
+    console.log("Ping successful");
     execIgnoreFail(`touch ../cred.txt`);
     execIgnoreFail(`echo "${cred}" > ../cred.txt`);
-    return true;
+    console.log("Write cred successful"); 
+  } catch {
+    console.log("failed to connect");
+    return false;
   }
 };
 
