@@ -120,28 +120,37 @@ const connect = (ssid, password, cred, countryCode = COUNTRY) => {
 
   execIgnoreFail("sudo killall wpa_supplicant");
   execIgnoreFail(
-    `sudo wpa_supplicant -B -i ${IFFACE_CLIENT} -c /etc/wpa_supplicant/wpa_supplicant.conf`,
-
+    `sudo wpa_supplicant -B -i ${IFFACE_CLIENT} -c /etc/wpa_supplicant/wpa_supplicant.conf`
   );
 
   execIgnoreFail(`sudo wpa_cli -i ${IFFACE_CLIENT} RECONFIGURE`);
+  execIgnoreFail(`sudo ifconfig ${IFFACE_CLIENT} down`);
   execIgnoreFail(`sudo ifconfig ${IFFACE_CLIENT} up`);
-  execIgnoreFail("sudo systemctl daemon-reload");
-  execIgnoreFail("sudo systemctl restart dhcpcd");
+  // execIgnoreFail("sudo systemctl daemon-reload");
+  // execIgnoreFail("sudo systemctl restart dhcpcd");
 
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      if (!checkIfIsConnected()) {
-        console.log("failed to connect");
-        resolve(false);
-      } else {
-        console.log("connected");
-        execIgnoreFail(`touch ../cred.txt`);
-        execIgnoreFail(`echo "${cred}" > ../cred.txt`);
-        resolve(true);
-      }
-    }, 7000);
-  });
+  // return new Promise((resolve) => {
+  //   setTimeout(() => {
+  //     if (!checkIfIsConnected()) {
+  //       console.log("failed to connect");
+  //       resolve(false);
+  //     } else {
+  //       console.log("connected");
+  //       execIgnoreFail(`touch ../cred.txt`);
+  //       execIgnoreFail(`echo "${cred}" > ../cred.txt`);
+  //       resolve(true);
+  //     }
+  //   }, 7000);
+  // });
+  if (!checkIfIsConnected()) {
+    console.log("failed to connect");
+    return false;
+  } else {
+    console.log("connected");
+    execIgnoreFail(`touch ../cred.txt`);
+    execIgnoreFail(`echo "${cred}" > ../cred.txt`);
+    return true;
+  }
 };
 
 // Holds scanned networks SSIDs
