@@ -118,10 +118,10 @@ const connect = (ssid, password, cred, countryCode = COUNTRY) => {
   );
   fs.writeFileSync("/etc/wpa_supplicant/wpa_supplicant.conf", fileContent);
   fs.writeFileSync(
-    "/etc/network/interface",
+    "/etc/network/interfaces",
     `auto wlan0
-  iface wlan0 inet manual
-  wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+iface wlan0 inet manual
+wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
   `
   );
 
