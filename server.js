@@ -4,6 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const template = require("./template");
 const iw = require("iwlist")("uap0");
+const bodyParser = require("body-parser");
 
 const app = express();
 
@@ -17,6 +18,11 @@ const SUBNET_RANGE_START = "192.168.88.100";
 const SUBNET_RANGE_END = "192.168.88.200";
 const NETMASK = "255.255.255.0";
 const COUNTRY = "IL";
+
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+
 
 /**
  * Aux method, write access point files from templates
@@ -206,22 +212,6 @@ app.post("/connect", async (req, res) => {
   }
 });
 
-app.get("/test", async (req, res) => {
-  const responseConnection = await connect(
-    req.query.ssid,
-    req.query.password,
-    req.query.cred
-  );
-
-  console.log(responseConnection);
-  res.send(responseConnection);
-
-  await sleep(30000);
-
-  if (responseConnection) {
-    disableAccessPoint();
-  }
-});
 
 app.listen(API_PORT, () => {
   console.log(`Example app listening on port ${API_PORT}`);
