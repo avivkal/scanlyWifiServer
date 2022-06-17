@@ -3,6 +3,7 @@ const cp = require("child_process");
 const path = require("path");
 const fs = require("fs");
 const template = require("./template");
+const { waitForDebugger } = require("inspector");
 const iw = require("iwlist")("uap0");
 
 const app = express();
@@ -122,6 +123,7 @@ const connect = async (ssid, password, cred, countryCode = COUNTRY) => {
       country: countryCode,
       ssid: ssid,
       psk: password,
+      key_mgmt: "WPA-PSK",
     }
   );
   fs.writeFileSync("/etc/wpa_supplicant/wpa_supplicant.conf", fileContent);
@@ -135,21 +137,23 @@ const connect = async (ssid, password, cred, countryCode = COUNTRY) => {
   );
 
   console.log("Starting connection");
-  await sleep(1000);
+  await sleep(500);
   execIgnoreFail("sudo killall wpa_supplicant");
-  await sleep(1000);
+  await sleep(500);
   execIgnoreFail(
     `sudo wpa_supplicant -B -i ${IFFACE_CLIENT} -c /etc/wpa_supplicant/wpa_supplicant.conf`
   );
 
-  await sleep(1000);
+  await sleep(500);
 
   execIgnoreFail(`sudo wpa_cli -i ${IFFACE_CLIENT} RECONFIGURE`);
-  await sleep(1000);
-  execIgnoreFail(`sudo ifconfig ${IFFACE_CLIENT} down`);
-  await sleep(1000);
-  execIgnoreFail(`sudo ifconfig ${IFFACE_CLIENT} up`);
-  await sleep(10000);
+  await sleep(500);
+  execIgnoreFail(`sudo ifdown ${IFFACE_CLIENT}`);
+  await sleep(500);
+  execIgnoreFail(`sudo ifup ${IFFACE_CLIENT}`);
+  await sleep(500);
+  execIgnoreFail(`sudo /etc/init.d/networking restart`);
+  await sleep(15000);
 
   console.log("Checking connection");
   try {
@@ -214,7 +218,9 @@ app.get("/test", async (req, res) => {
 
   console.log(responseConnection);
   res.send(responseConnection);
-  
+
+  await sleep(30000);
+
   if (responseConnection) {
     disableAccessPoint();
   }
