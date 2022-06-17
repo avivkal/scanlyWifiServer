@@ -162,6 +162,7 @@ const connect = async (ssid, password, cred, countryCode = COUNTRY) => {
     execIgnoreFail(`touch ../cred.txt`);
     execIgnoreFail(`echo "${cred}" > ../cred.txt`);
     console.log("Write cred successful");
+    return true;
   } catch {
     console.log("failed to connect");
     return false;
