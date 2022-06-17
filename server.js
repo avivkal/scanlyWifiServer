@@ -3,7 +3,6 @@ const cp = require("child_process");
 const path = require("path");
 const fs = require("fs");
 const template = require("./template");
-const { waitForDebugger } = require("inspector");
 const iw = require("iwlist")("uap0");
 
 const app = express();
@@ -98,8 +97,6 @@ const disableAccessPoint = () => {
   cp.exec(`sudo systemctl restart dhcpd`);
 };
 
-const errorCallaback = (error) => console.log(error);
-
 const sleep = (time) => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -122,8 +119,7 @@ const connect = async (ssid, password, cred, countryCode = COUNTRY) => {
     {
       country: countryCode,
       ssid: ssid,
-      psk: password,
-      key_mgmt: "WPA-PSK",
+      psk: password
     }
   );
   fs.writeFileSync("/etc/wpa_supplicant/wpa_supplicant.conf", fileContent);
