@@ -5,7 +5,6 @@ const fs = require("fs");
 const template = require("./template");
 const iw = require("iwlist")("uap0");
 const bodyParser = require("body-parser");
-const https = require("https");
 
 const app = express();
 
@@ -199,12 +198,11 @@ app.get("/scan", async (_req, res) => {
   res.send(result);
 });
 
-app.post("/connect", async (req, res) => {
-  const responseConnection = await connect(
-    req.body.ssid,
-    req.body.password,
-    req.body.cred
-  );
+app.get("/connect", async (req, res) => {
+  const responseConnection = await connect(req.query.ssid, req.query.password, {
+    email: req.query.sUser,
+    password: req.query.sPass,
+  });
 
   console.log(responseConnection);
   res.send(responseConnection);
@@ -214,17 +212,12 @@ app.post("/connect", async (req, res) => {
   }
 });
 
-https
-  .createServer(
-    { key: fs.readFileSync("./certs/key.pem"), cert: fs.readFileSync("./certs/cert.pem") },
-    app
-  )
-  .listen(API_PORT, () => {
-    console.log(`Example app listening on port ${API_PORT}`);
-    if (checkIfIsConnected()) {
-      disableAccessPoint();
-    } else {
-      enableAccesPoint();
-      console.log("AP is UP!");
-    }
-  });
+app.listen(API_PORT, () => {
+  console.log(`Example app listening on port ${API_PORT}`);
+  if (checkIfIsConnected()) {
+    disableAccessPoint();
+  } else {
+    enableAccesPoint();
+    console.log("AP is UP!");
+  }
+});
