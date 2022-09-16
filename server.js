@@ -193,6 +193,19 @@ app.get("/isAlive", (_req, res) => {
   res.send(true);
 });
 
+app.get("/isUp", async (_req, res) => {
+  try {
+    cp.execSync("ping -c 1 google.com");
+    console.log("Ping successful");
+    res.send(true);
+    await sleep(2000);
+    disableAccessPoint();
+  } catch {
+    console.log("failed to connect");
+    res.send(false);
+  }
+});
+
 app.get("/scan", async (_req, res) => {
   const result = await _scan();
   res.send(result);
@@ -206,10 +219,6 @@ app.get("/connect", async (req, res) => {
 
   console.log(responseConnection);
   res.send(responseConnection);
-
-  if (responseConnection) {
-    disableAccessPoint();
-  }
 });
 
 app.listen(API_PORT, () => {
