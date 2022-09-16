@@ -5,6 +5,7 @@ const fs = require("fs");
 const template = require("./template");
 const iw = require("iwlist")("uap0");
 const bodyParser = require("body-parser");
+const https = require("https");
 
 const app = express();
 
@@ -19,10 +20,8 @@ const SUBNET_RANGE_END = "192.168.88.200";
 const NETMASK = "255.255.255.0";
 const COUNTRY = "IL";
 
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-
 
 /**
  * Aux method, write access point files from templates
@@ -125,7 +124,7 @@ const connect = async (ssid, password, cred, countryCode = COUNTRY) => {
     {
       country: countryCode,
       ssid: ssid,
-      psk: password
+      psk: password,
     }
   );
   fs.writeFileSync("/etc/wpa_supplicant/wpa_supplicant.conf", fileContent);
@@ -215,13 +214,17 @@ app.post("/connect", async (req, res) => {
   }
 });
 
-
-app.listen(API_PORT, () => {
-  console.log(`Example app listening on port ${API_PORT}`);
-  if (checkIfIsConnected()) {
-    disableAccessPoint();
-  } else {
-    enableAccesPoint();
-    console.log("AP is UP!");
-  }
-});
+https
+  .createServer(
+    { key: fs.readFileSync("./certs/key.pem"), cert: fs.readFileSync("./certs/cert.pem") },
+    app
+  )
+  .listen(API_PORT, () => {
+    console.log(`Example app listening on port ${API_PORT}`);
+    if (checkIfIsConnected()) {
+      disableAccessPoint();
+    } else {
+      enableAccesPoint();
+      console.log("AP is UP!");
+    }
+  });
