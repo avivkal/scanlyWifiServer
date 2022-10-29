@@ -198,12 +198,15 @@ app.get("/isUp", async (_req, res) => {
     cp.execSync("ping -c 1 google.com");
     console.log("Ping successful");
     res.send(true);
-    await sleep(2000);
-    disableAccessPoint();
   } catch {
     console.log("failed to connect");
     res.send(false);
   }
+});
+
+app.get("/fall", async (_req, res) => {
+  disableAccessPoint();
+  res.send("fell");
 });
 
 app.get("/scan", async (_req, res) => {
