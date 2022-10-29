@@ -160,10 +160,10 @@ const connect = async (ssid, password, cred, countryCode = COUNTRY) => {
     cp.execSync("ping -c 1 google.com");
     console.log("Ping successful");
     console.log("cred:", cred);
-    execIgnoreFail(`touch ../email.txt`);
-    execIgnoreFail(`touch ../password.txt`);
-    execIgnoreFail(`echo "${cred.email}" > ../email.txt`);
-    execIgnoreFail(`echo "${cred.password}" > ../password.txt`);
+    execIgnoreFail(`touch /home/pi/barcode/email.txt`);
+    execIgnoreFail(`touch /home/pi/barcode/password.txt`);
+    execIgnoreFail(`echo "${cred.email}" > /home/pi/barcode/email.txt`);
+    execIgnoreFail(`echo "${cred.password}" > /home/pi/barcode/password.txt`);
     console.log("Write cred successful");
     return true;
   } catch {
