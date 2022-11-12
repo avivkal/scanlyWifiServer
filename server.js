@@ -99,6 +99,8 @@ const disableAccessPoint = () => {
   cp.exec("sudo systemctl disable hostapd");
   cp.exec(`sudo iw dev ${IFFACE} del`);
   cp.exec(`sudo systemctl restart dhcpd`);
+
+  process.exit(0);
 };
 
 const sleep = (time) => {
@@ -228,7 +230,6 @@ app.listen(API_PORT, () => {
   console.log(`Example app listening on port ${API_PORT}`);
   if (checkIfIsConnected()) {
     disableAccessPoint();
-    process.exit(0);
   } else {
     enableAccesPoint();
     console.log("AP is UP!");
