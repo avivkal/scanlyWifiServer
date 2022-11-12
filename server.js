@@ -228,6 +228,7 @@ app.listen(API_PORT, () => {
   console.log(`Example app listening on port ${API_PORT}`);
   if (checkIfIsConnected()) {
     disableAccessPoint();
+    process.exit(0);
   } else {
     enableAccesPoint();
     console.log("AP is UP!");
